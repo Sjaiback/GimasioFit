@@ -1,0 +1,22 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pagina no encontrada | Control Fit</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body class="error-page">
+  <main class="error-shell">
+    <img src="{% static 'img/control-fit-mark.svg' %}" alt="Control Fit">
+    <span class="eyebrow">Error 404</span>
+    <h1>Esta ruta no existe</h1>
+    <p>La pagina que buscas pudo moverse, cambiar de nombre o no estar disponible para tu rol.</p>
+    <div class="top-actions">
+      <a class="button primary" href="{% url 'frontend:dashboard' %}">Volver al dashboard</a>
+      <a class="button" href="{% url 'frontend:login' %}">Iniciar sesion</a>
+    </div>
+  </main>
+</body>
+</html>

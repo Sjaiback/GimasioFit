@@ -43,6 +43,10 @@ def logout_view(request):
     return redirect("frontend:login")
 
 
+def not_found(request, exception):
+    return render(request, "frontend/404.html", status=404)
+
+
 @role_required(ADMIN, MANAGER, RECEPTION)
 def dashboard(request):
     return render(
