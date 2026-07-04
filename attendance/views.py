@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
+from accounts.security import ADMIN, MANAGER, RECEPTION, role_required
 from members.models import Member
 
 from .models import AttendanceCredential, AttendanceRecord
@@ -20,6 +21,7 @@ def _json_body(request):
     return json.loads(request.body.decode("utf-8") or "{}")
 
 
+@role_required(ADMIN, MANAGER, RECEPTION)
 @require_http_methods(["GET"])
 def attendance_collection(request):
     records = AttendanceRecord.objects.select_related("member")
@@ -27,6 +29,7 @@ def attendance_collection(request):
 
 
 @csrf_exempt
+@role_required(ADMIN, MANAGER, RECEPTION)
 @require_http_methods(["POST"])
 def scan_attendance(request):
     data = _json_body(request)
@@ -41,6 +44,7 @@ def scan_attendance(request):
     )
 
 
+@role_required(ADMIN, MANAGER, RECEPTION)
 @require_http_methods(["GET"])
 def member_qr(request, member_id):
     member = get_object_or_404(Member, pk=member_id)
@@ -48,6 +52,7 @@ def member_qr(request, member_id):
 
 
 @csrf_exempt
+@role_required(ADMIN, MANAGER)
 @require_http_methods(["POST"])
 def rotate_member_qr(request, member_id):
     member = get_object_or_404(Member, pk=member_id)
@@ -56,6 +61,7 @@ def rotate_member_qr(request, member_id):
     return JsonResponse({"token": str(credential.token)})
 
 
+@role_required(ADMIN, MANAGER)
 @require_http_methods(["GET"])
 def credential_collection(request):
     credentials = AttendanceCredential.objects.select_related("member")

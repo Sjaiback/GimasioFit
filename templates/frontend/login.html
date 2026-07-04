@@ -1,0 +1,44 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ingresar | Control Fit</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body class="login-page">
+  <main class="login-shell">
+    <section class="login-visual">
+      <img src="{% static 'img/control-fit-mark.svg' %}" alt="Control Fit">
+      <div>
+        <span class="eyebrow">Acceso seguro</span>
+        <h1>Control Fit</h1>
+        <p>Gestion de socios, caja, membresias y asistencia con permisos por rol.</p>
+      </div>
+    </section>
+    <section class="login-panel">
+      {% if messages %}
+        <div class="messages">
+          {% for message in messages %}
+            <div class="message">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+      <form method="post">
+        {% csrf_token %}
+        <h2>Iniciar sesion</h2>
+        <label>
+          Usuario
+          <input name="username" autocomplete="username" required>
+        </label>
+        <label>
+          Contrasena
+          <input name="password" type="password" autocomplete="current-password" required>
+        </label>
+        <button class="button primary" type="submit">Entrar</button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>

@@ -17,6 +17,9 @@
           <span>Gestion de gimnasio</span>
         </span>
       </a>
+      {% if user.is_authenticated %}
+        <div class="role-pill">{{ user.username }} · {{ current_role|default:"sin rol" }}</div>
+      {% endif %}
       <nav class="nav" aria-label="Principal">
         <a href="{% url 'frontend:dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 13h6V4H4v9Zm10 7h6V4h-6v16ZM4 20h6v-4H4v4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
@@ -26,10 +29,12 @@
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M16 19c0-2.2-1.8-4-4-4H8c-2.2 0-4 1.8-4 4M14 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0Zm3 5 2 2 4-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
           <span>Socios</span>
         </a>
-        <a href="{% url 'frontend:memberships' %}" class="{% if request.resolver_match.url_name == 'memberships' %}active{% endif %}">
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 4h14v16H5V4Zm4 5h6m-6 4h6m-6 4h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <span>Membresias</span>
-        </a>
+        {% if can_manage %}
+          <a href="{% url 'frontend:memberships' %}" class="{% if request.resolver_match.url_name == 'memberships' %}active{% endif %}">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 4h14v16H5V4Zm4 5h6m-6 4h6m-6 4h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span>Membresias</span>
+          </a>
+        {% endif %}
         <a href="{% url 'frontend:billing' %}" class="{% if request.resolver_match.url_name == 'billing' %}active{% endif %}">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16v10H4V7Zm0 3h16m-5 5h2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
           <span>Pagos</span>
@@ -38,6 +43,12 @@
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 5h5v5H5V5Zm9 0h5v5h-5V5ZM5 14h5v5H5v-5Zm9 0h2v2h-2v-2Zm4 0h1v5h-5v-1h4v-4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
           <span>Asistencia</span>
         </a>
+        {% if user.is_authenticated %}
+          <a href="{% url 'frontend:logout' %}">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 6H5v12h5m4-9 3 3-3 3m-5-3h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span>Salir</span>
+          </a>
+        {% endif %}
       </nav>
     </aside>
     <main class="main">

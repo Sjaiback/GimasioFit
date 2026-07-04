@@ -1,9 +1,11 @@
 from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
 from django.db.models import Q
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 
+from accounts.security import ADMIN, MANAGER, RECEPTION, role_required, user_role
 from attendance.models import AttendanceRecord
 from attendance.services import (
     get_or_create_credential,
@@ -19,6 +21,29 @@ from reports.services import administrative_metrics, dashboard_metrics
 from .forms import DebtForm, MemberForm, MembershipForm, MembershipPlanForm, PaymentForm
 
 
+@require_http_methods(["GET", "POST"])
+def login_view(request):
+    if request.user.is_authenticated:
+        return redirect("frontend:dashboard")
+
+    if request.method == "POST":
+        username = request.POST.get("username", "")
+        password = request.POST.get("password", "")
+        user = authenticate(request, username=username, password=password)
+        if user and user.is_active:
+            login(request, user)
+            return redirect(request.GET.get("next") or "frontend:dashboard")
+        messages.error(request, "Credenciales invalidas o usuario inactivo.")
+
+    return render(request, "frontend/login.html")
+
+
+def logout_view(request):
+    logout(request)
+    return redirect("frontend:login")
+
+
+@role_required(ADMIN, MANAGER, RECEPTION)
 def dashboard(request):
     return render(
         request,
@@ -29,10 +54,12 @@ def dashboard(request):
             "recent_members": Member.objects.order_by("-joined_at")[:6],
             "recent_payments": Payment.objects.select_related("member").order_by("-paid_at")[:6],
             "today_attendance": AttendanceRecord.objects.filter(check_in_at__date=timezone.localdate()).count(),
+            "current_role": user_role(request.user),
         },
     )
 
 
+@role_required(ADMIN, MANAGER, RECEPTION)
 @require_http_methods(["GET", "POST"])
 def members(request):
     form = MemberForm(request.POST or None)
@@ -56,6 +83,7 @@ def members(request):
     )
 
 
+@role_required(ADMIN, MANAGER)
 @require_http_methods(["GET", "POST"])
 def memberships(request):
     plan_form = MembershipPlanForm(prefix="plan")
@@ -88,6 +116,7 @@ def memberships(request):
     )
 
 
+@role_required(ADMIN, MANAGER, RECEPTION)
 @require_http_methods(["GET", "POST"])
 def billing(request):
     payment_form = PaymentForm(prefix="payment")
@@ -105,12 +134,18 @@ def billing(request):
                     messages.success(request, "Comprobante emitido automaticamente.")
                 return redirect("frontend:billing")
         elif action == "create_debt":
+            if not has_management_access(request.user):
+                messages.error(request, "No tienes permisos para registrar deudas.")
+                return redirect("frontend:billing")
             debt_form = DebtForm(request.POST, prefix="debt")
             if debt_form.is_valid():
                 debt_form.save()
                 messages.success(request, "Deuda registrada correctamente.")
                 return redirect("frontend:billing")
         elif action == "verify_payment":
+            if not has_management_access(request.user):
+                messages.error(request, "No tienes permisos para verificar pagos.")
+                return redirect("frontend:billing")
             payment = Payment.objects.get(pk=request.POST["payment_id"])
             payment.verify()
             issue_invoice_for_payment(payment.id)
@@ -130,6 +165,11 @@ def billing(request):
     )
 
 
+def has_management_access(user):
+    return user_role(user) in {ADMIN, MANAGER}
+
+
+@role_required(ADMIN, MANAGER, RECEPTION)
 @require_http_methods(["GET", "POST"])
 def attendance(request):
     scan_result = None

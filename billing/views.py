@@ -5,6 +5,8 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
+from accounts.security import ADMIN, MANAGER, RECEPTION, role_required
+
 from .models import Debt, Invoice, Payment
 from .serializers import debt_to_dict, invoice_to_dict, payment_to_dict
 from .services import issue_invoice_for_payment
@@ -15,6 +17,7 @@ def _json_body(request):
 
 
 @csrf_exempt
+@role_required(ADMIN, MANAGER, RECEPTION)
 @require_http_methods(["GET", "POST"])
 def payment_collection(request):
     if request.method == "GET":
@@ -38,6 +41,7 @@ def payment_collection(request):
 
 
 @csrf_exempt
+@role_required(ADMIN, MANAGER)
 @require_http_methods(["POST"])
 def verify_payment(request, payment_id):
     payment = get_object_or_404(Payment, pk=payment_id)
@@ -46,6 +50,7 @@ def verify_payment(request, payment_id):
 
 
 @csrf_exempt
+@role_required(ADMIN, MANAGER)
 @require_http_methods(["GET", "POST"])
 def invoice_collection(request):
     if request.method == "GET":
@@ -58,6 +63,7 @@ def invoice_collection(request):
 
 
 @csrf_exempt
+@role_required(ADMIN, MANAGER)
 @require_http_methods(["GET", "POST"])
 def debt_collection(request):
     if request.method == "GET":

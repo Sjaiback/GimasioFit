@@ -8,6 +8,13 @@ Backend Django para administracion de gimnasio.
 - Base de datos configurada para PostgreSQL por variables de entorno.
 - Apps separadas por dominio: cuentas, socios, membresias, pagos, reportes y notificaciones.
 - Endpoints JSON para gestion operativa y dashboard administrativo.
+- Login obligatorio y roles operativos: administrador, encargado y recepcion.
+
+## Roles
+
+- Administrador: acceso completo.
+- Encargado: gestion operativa, membresias, reportes y verificaciones.
+- Recepcion: socios, pagos basicos y asistencia.
 
 ## Configuracion local
 

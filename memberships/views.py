@@ -7,6 +7,8 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
+from accounts.security import ADMIN, MANAGER, role_required
+
 from .models import Membership, MembershipPlan
 from .serializers import membership_to_dict, plan_to_dict
 
@@ -16,6 +18,7 @@ def _json_body(request):
 
 
 @csrf_exempt
+@role_required(ADMIN, MANAGER)
 @require_http_methods(["GET", "POST"])
 def plan_collection(request):
     if request.method == "GET":
@@ -26,6 +29,7 @@ def plan_collection(request):
 
 
 @csrf_exempt
+@role_required(ADMIN, MANAGER)
 @require_http_methods(["GET", "POST"])
 def membership_collection(request):
     if request.method == "GET":
@@ -49,6 +53,7 @@ def membership_collection(request):
 
 
 @csrf_exempt
+@role_required(ADMIN, MANAGER)
 @require_http_methods(["POST"])
 def renew_membership(request, membership_id):
     membership = get_object_or_404(Membership, pk=membership_id)
@@ -57,6 +62,7 @@ def renew_membership(request, membership_id):
 
 
 @csrf_exempt
+@role_required(ADMIN, MANAGER)
 @require_http_methods(["POST"])
 def suspend_membership(request, membership_id):
     membership = get_object_or_404(Membership, pk=membership_id)
@@ -65,6 +71,7 @@ def suspend_membership(request, membership_id):
 
 
 @csrf_exempt
+@role_required(ADMIN, MANAGER)
 @require_http_methods(["POST"])
 def cancel_membership(request, membership_id):
     membership = get_object_or_404(Membership, pk=membership_id)

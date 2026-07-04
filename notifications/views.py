@@ -4,6 +4,8 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
+from accounts.security import ADMIN, MANAGER, role_required
+
 from .models import NotificationTemplate
 from .services import queue_membership_expiration_reminders, send_pending_email_notifications
 
@@ -24,6 +26,7 @@ def _template_to_dict(template):
 
 
 @csrf_exempt
+@role_required(ADMIN, MANAGER)
 @require_http_methods(["GET", "POST"])
 def template_collection(request):
     if request.method == "GET":
@@ -34,6 +37,7 @@ def template_collection(request):
 
 
 @csrf_exempt
+@role_required(ADMIN, MANAGER)
 @require_http_methods(["POST"])
 def queue_expiration_reminders(request):
     data = _json_body(request)
@@ -42,6 +46,7 @@ def queue_expiration_reminders(request):
 
 
 @csrf_exempt
+@role_required(ADMIN, MANAGER)
 @require_http_methods(["POST"])
 def send_pending_notifications(request):
     return JsonResponse(send_pending_email_notifications())

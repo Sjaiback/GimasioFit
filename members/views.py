@@ -7,6 +7,8 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
+from accounts.security import ADMIN, MANAGER, RECEPTION, role_required
+
 from .models import Member
 from .serializers import member_to_dict
 
@@ -16,6 +18,7 @@ def _json_body(request):
 
 
 @csrf_exempt
+@role_required(ADMIN, MANAGER, RECEPTION)
 @require_http_methods(["GET", "POST"])
 def member_collection(request):
     if request.method == "GET":
@@ -38,6 +41,7 @@ def member_collection(request):
 
 
 @csrf_exempt
+@role_required(ADMIN, MANAGER, RECEPTION)
 @require_http_methods(["GET", "PATCH", "DELETE"])
 def member_detail(request, member_id):
     member = get_object_or_404(Member, pk=member_id)
@@ -56,6 +60,7 @@ def member_detail(request, member_id):
     return JsonResponse(member_to_dict(member))
 
 
+@role_required(ADMIN, MANAGER, RECEPTION)
 @require_http_methods(["GET"])
 def member_history(request, member_id):
     member = get_object_or_404(Member, pk=member_id)
