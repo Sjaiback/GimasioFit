@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: control_fit_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-gimnasio}
+      POSTGRES_USER: ${POSTGRES_USER:-gimnasio}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-gimnasio}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
