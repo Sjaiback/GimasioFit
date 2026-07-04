@@ -1,0 +1,9 @@
+flask
+gunicorn
+flask-sqlalchemy
+qrcode
+pillow
+werkzeug
+python-dateutil
+requests
+
