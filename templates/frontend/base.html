@@ -34,6 +34,10 @@
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16v10H4V7Zm0 3h16m-5 5h2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
           <span>Pagos</span>
         </a>
+        <a href="{% url 'frontend:attendance' %}" class="{% if request.resolver_match.url_name == 'attendance' %}active{% endif %}">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 5h5v5H5V5Zm9 0h5v5h-5V5ZM5 14h5v5H5v-5Zm9 0h2v2h-2v-2Zm4 0h1v5h-5v-1h4v-4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+          <span>Asistencia</span>
+        </a>
       </nav>
     </aside>
     <main class="main">
@@ -48,5 +52,6 @@
     </main>
   </div>
   <script src="{% static 'js/app.js' %}"></script>
+  {% block scripts %}{% endblock %}
 </body>
 </html>

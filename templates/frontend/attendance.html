@@ -1,0 +1,143 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}Asistencia QR | Control Fit{% endblock %}
+
+{% block content %}
+<section class="topbar">
+  <div>
+    <div class="eyebrow">Control de acceso</div>
+    <h1>Asistencia por QR</h1>
+  </div>
+  <div class="top-actions">
+    <a class="button" href="#credenciales">Ver QR de socios</a>
+  </div>
+</section>
+
+<section class="grid layout-two">
+  <div class="panel">
+    <div class="panel-header">
+      <div>
+        <h2>Escaner</h2>
+        <span class="eyebrow">Camara o codigo manual</span>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="scanner-frame">
+        <video id="qr-video" playsinline muted></video>
+        <div class="scanner-line"></div>
+      </div>
+      <form method="post" id="scan-form" style="margin-top: 14px">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="scan_payload">
+        <label>
+          Codigo QR
+          <input id="payload-input" name="payload" placeholder="CONTROLFIT-ATTENDANCE:..." required>
+        </label>
+        <div class="top-actions" style="margin-top: 14px">
+          <button class="button" type="button" id="start-scanner">Activar camara</button>
+          <button class="button primary" type="submit">Registrar asistencia</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <aside class="panel">
+    <div class="panel-header">
+      <div>
+        <h2>Registro manual</h2>
+        <span class="eyebrow">Fallback de recepcion</span>
+      </div>
+    </div>
+    <form class="panel-body" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="manual_member">
+      <label>
+        Socio
+        <select name="member_id" required>
+          <option value="">Seleccionar socio</option>
+          {% for member in members %}
+            <option value="{{ member.id }}">{{ member }} - {{ member.document_number }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <div class="top-actions" style="margin-top: 14px">
+        <button class="button primary" type="submit">Entrada / salida</button>
+      </div>
+    </form>
+  </aside>
+</section>
+
+<section class="grid layout-two">
+  <div class="panel">
+    <div class="panel-header">
+      <div>
+        <h2>Asistencia de hoy</h2>
+        <span class="eyebrow">Entradas y salidas</span>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Socio</th><th>Entrada</th><th>Salida</th><th>Duracion</th><th>Origen</th></tr></thead>
+        <tbody>
+          {% for record in records %}
+            <tr>
+              <td>{{ record.member }}</td>
+              <td>{{ record.check_in_at|date:"H:i" }}</td>
+              <td>{{ record.check_out_at|date:"H:i"|default:"En sala" }}</td>
+              <td>{{ record.duration_minutes }} min</td>
+              <td><span class="badge">{{ record.get_source_display }}</span></td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="5" class="empty">Aun no hay asistencias hoy.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <aside class="panel">
+    <div class="panel-header">
+      <div>
+        <h2>En sala ahora</h2>
+        <span class="eyebrow">Registros abiertos</span>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Socio</th><th>Entrada</th></tr></thead>
+        <tbody>
+          {% for record in open_records %}
+            <tr><td>{{ record.member }}</td><td>{{ record.check_in_at|date:"H:i" }}</td></tr>
+          {% empty %}
+            <tr><td colspan="2" class="empty">No hay socios en sala.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </aside>
+</section>
+
+<section class="panel" id="credenciales" style="margin-top: 16px">
+  <div class="panel-header">
+    <div>
+      <h2>Credenciales QR</h2>
+      <span class="eyebrow">Imprimir o mostrar al socio</span>
+    </div>
+  </div>
+  <div class="qr-grid">
+    {% for member in members %}
+      <article class="qr-card">
+        <img src="/api/attendance/members/{{ member.id }}/qr.png" alt="QR de {{ member }}">
+        <strong>{{ member }}</strong>
+        <span>{{ member.document_number }}</span>
+      </article>
+    {% empty %}
+      <p class="empty">Registra socios para generar sus QR.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/qr-scanner.js"></script>
+{% endblock %}

@@ -1,8 +1,15 @@
 from django.contrib import messages
 from django.db.models import Q
 from django.shortcuts import redirect, render
+from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 
+from attendance.models import AttendanceRecord
+from attendance.services import (
+    get_or_create_credential,
+    register_attendance_from_payload,
+    register_manual_attendance,
+)
 from billing.models import Debt, Invoice, Payment
 from billing.services import issue_invoice_for_payment
 from members.models import Member
@@ -21,6 +28,7 @@ def dashboard(request):
             "admin_report": administrative_metrics(),
             "recent_members": Member.objects.order_by("-joined_at")[:6],
             "recent_payments": Payment.objects.select_related("member").order_by("-paid_at")[:6],
+            "today_attendance": AttendanceRecord.objects.filter(check_in_at__date=timezone.localdate()).count(),
         },
     )
 
@@ -118,5 +126,38 @@ def billing(request):
             "payments": Payment.objects.select_related("member", "membership", "service")[:80],
             "debts": Debt.objects.select_related("member")[:80],
             "invoices": Invoice.objects.select_related("payment", "payment__member")[:30],
+        },
+    )
+
+
+@require_http_methods(["GET", "POST"])
+def attendance(request):
+    scan_result = None
+    if request.method == "POST":
+        action = request.POST.get("action")
+        try:
+            if action == "scan_payload":
+                scan_result = register_attendance_from_payload(request.POST["payload"])
+            elif action == "manual_member":
+                scan_result = register_manual_attendance(request.POST["member_id"])
+            if scan_result:
+                movement = "entrada" if scan_result["action"] == "check_in" else "salida"
+                messages.success(request, f"{scan_result['member']} registro {movement} correctamente.")
+                return redirect("frontend:attendance")
+        except Exception as exc:
+            messages.error(request, f"No se pudo registrar la asistencia: {exc}")
+
+    today = timezone.localdate()
+    members = Member.objects.all()[:80]
+    for member in members:
+        get_or_create_credential(member)
+
+    return render(
+        request,
+        "frontend/attendance.html",
+        {
+            "members": members,
+            "records": AttendanceRecord.objects.select_related("member").filter(check_in_at__date=today)[:120],
+            "open_records": AttendanceRecord.objects.select_related("member").filter(check_out_at__isnull=True),
         },
     )
