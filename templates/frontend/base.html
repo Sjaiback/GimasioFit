@@ -1,0 +1,52 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Control Fit{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="{% url 'frontend:dashboard' %}">
+        <img src="{% static 'img/control-fit-mark.svg' %}" alt="Control Fit">
+        <span>
+          <strong>Control Fit</strong>
+          <span>Gestion de gimnasio</span>
+        </span>
+      </a>
+      <nav class="nav" aria-label="Principal">
+        <a href="{% url 'frontend:dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 13h6V4H4v9Zm10 7h6V4h-6v16ZM4 20h6v-4H4v4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+          <span>Dashboard</span>
+        </a>
+        <a href="{% url 'frontend:members' %}" class="{% if request.resolver_match.url_name == 'members' %}active{% endif %}">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M16 19c0-2.2-1.8-4-4-4H8c-2.2 0-4 1.8-4 4M14 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0Zm3 5 2 2 4-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>Socios</span>
+        </a>
+        <a href="{% url 'frontend:memberships' %}" class="{% if request.resolver_match.url_name == 'memberships' %}active{% endif %}">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 4h14v16H5V4Zm4 5h6m-6 4h6m-6 4h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>Membresias</span>
+        </a>
+        <a href="{% url 'frontend:billing' %}" class="{% if request.resolver_match.url_name == 'billing' %}active{% endif %}">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16v10H4V7Zm0 3h16m-5 5h2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>Pagos</span>
+        </a>
+      </nav>
+    </aside>
+    <main class="main">
+      {% if messages %}
+        <div class="messages">
+          {% for message in messages %}
+            <div class="message">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+  <script src="{% static 'js/app.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}Membresias | Control Fit{% endblock %}
+
+{% block content %}
+<section class="topbar">
+  <div>
+    <div class="eyebrow">Planes</div>
+    <h1>Membresias activas y renovaciones</h1>
+  </div>
+</section>
+
+<section class="grid stats">
+  {% for plan in plans %}
+    <article class="stat" style="--accent: var(--blue)">
+      <span>{{ plan.get_duration_months_display }}</span>
+      <strong>S/ {{ plan.price }}</strong>
+      <p>{{ plan.name }}</p>
+    </article>
+  {% empty %}
+    <article class="stat">
+      <span>Sin planes</span>
+      <strong>0</strong>
+    </article>
+  {% endfor %}
+</section>
+
+<section class="grid layout-two">
+  <div class="panel">
+    <div class="panel-header"><h2>Membresias registradas</h2></div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Socio</th><th>Plan</th><th>Inicio</th><th>Fin</th><th>Estado</th><th>Dias</th></tr>
+        </thead>
+        <tbody>
+          {% for membership in memberships %}
+            <tr>
+              <td>{{ membership.member }}</td>
+              <td>{{ membership.plan.name }}</td>
+              <td>{{ membership.start_date|date:"d/m/Y" }}</td>
+              <td>{{ membership.end_date|date:"d/m/Y" }}</td>
+              <td><span class="badge {{ membership.status }}">{{ membership.get_status_display }}</span></td>
+              <td>{{ membership.days_to_expire }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="6" class="empty">Aun no hay membresias.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="grid">
+    <aside class="panel">
+      <div class="panel-header">
+        <div>
+          <h2>Crear plan</h2>
+          <span class="eyebrow">Mensual, trimestral, semestral o anual</span>
+        </div>
+      </div>
+      <form class="panel-body" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="create_plan">
+        {% include "frontend/_form_fields.html" with form=plan_form %}
+        <div class="top-actions" style="margin-top: 14px">
+          <button class="button primary" type="submit">Guardar plan</button>
+        </div>
+      </form>
+    </aside>
+
+    <aside class="panel">
+      <div class="panel-header">
+        <div>
+          <h2>Asignar membresia</h2>
+          <span class="eyebrow">Alta, renovacion o suspension</span>
+        </div>
+      </div>
+      <form class="panel-body" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="create_membership">
+        {% include "frontend/_form_fields.html" with form=membership_form %}
+        <div class="top-actions" style="margin-top: 14px">
+          <button class="button primary" type="submit">Guardar membresia</button>
+        </div>
+      </form>
+    </aside>
+  </div>
+</section>
+{% endblock %}

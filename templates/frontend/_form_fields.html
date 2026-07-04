@@ -1,0 +1,11 @@
+<div class="form-grid">
+  {% for field in form %}
+    <label class="{% if field.field.widget.input_type == 'textarea' %}full{% endif %}">
+      {{ field.label }}
+      {{ field }}
+      {% if field.errors %}
+        <small>{{ field.errors|striptags }}</small>
+      {% endif %}
+    </label>
+  {% endfor %}
+</div>

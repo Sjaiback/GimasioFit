@@ -3,6 +3,14 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+ENV_FILE = BASE_DIR / ".env"
+if ENV_FILE.exists():
+    for raw_line in ENV_FILE.read_text().splitlines():
+        line = raw_line.strip()
+        if line and not line.startswith("#") and "=" in line:
+            key, value = line.split("=", 1)
+            os.environ.setdefault(key.strip(), value.strip())
+
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-only-change-me-control-fit")
 DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() == "true"
 ALLOWED_HOSTS = [
@@ -24,6 +32,7 @@ INSTALLED_APPS = [
     "billing",
     "reports",
     "notifications",
+    "frontend",
 ]
 
 MIDDLEWARE = [

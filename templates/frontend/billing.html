@@ -1,0 +1,128 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}Pagos | Control Fit{% endblock %}
+
+{% block content %}
+<section class="topbar">
+  <div>
+    <div class="eyebrow">Caja</div>
+    <h1>Pagos, comprobantes y deudas</h1>
+  </div>
+</section>
+
+<section class="grid layout-two">
+  <div class="panel">
+    <div class="panel-header"><h2>Pagos registrados</h2></div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Socio</th><th>Monto</th><th>Metodo</th><th>Estado</th><th>Fecha</th><th></th></tr>
+        </thead>
+        <tbody>
+          {% for payment in payments %}
+            <tr>
+              <td>{{ payment.member }}</td>
+              <td>S/ {{ payment.amount }}</td>
+              <td>{{ payment.get_method_display }}</td>
+              <td><span class="badge {{ payment.status }}">{{ payment.get_status_display }}</span></td>
+              <td>{{ payment.paid_at|date:"d/m/Y H:i" }}</td>
+              <td>
+                {% if payment.status == "pending" %}
+                  <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="verify_payment">
+                    <input type="hidden" name="payment_id" value="{{ payment.id }}">
+                    <button class="button" type="submit" data-confirm="Verificar este pago?">Verificar</button>
+                  </form>
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="6" class="empty">Aun no hay pagos registrados.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <aside class="panel">
+    <div class="panel-header">
+      <div>
+        <h2>Registrar pago</h2>
+        <span class="eyebrow">Membresia o servicio adicional</span>
+      </div>
+    </div>
+    <form class="panel-body" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="create_payment">
+      {% include "frontend/_form_fields.html" with form=payment_form %}
+      <div class="top-actions" style="margin-top: 14px">
+        <button class="button primary" type="submit">Guardar pago</button>
+      </div>
+    </form>
+  </aside>
+</section>
+
+<section class="grid layout-two">
+  <div class="panel">
+    <div class="panel-header"><h2>Deudas pendientes</h2></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Socio</th><th>Concepto</th><th>Monto</th><th>Vence</th><th>Estado</th></tr></thead>
+        <tbody>
+          {% for debt in debts %}
+            <tr>
+              <td>{{ debt.member }}</td>
+              <td>{{ debt.concept }}</td>
+              <td>S/ {{ debt.amount }}</td>
+              <td>{{ debt.due_date|date:"d/m/Y" }}</td>
+              <td><span class="badge {{ debt.status }}">{{ debt.get_status_display }}</span></td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="5" class="empty">No hay deudas registradas.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <aside class="panel">
+    <div class="panel-header">
+      <div>
+        <h2>Registrar deuda</h2>
+        <span class="eyebrow">Control de pendientes</span>
+      </div>
+    </div>
+    <form class="panel-body" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="create_debt">
+      {% include "frontend/_form_fields.html" with form=debt_form %}
+      <div class="top-actions" style="margin-top: 14px">
+        <button class="button primary" type="submit">Guardar deuda</button>
+      </div>
+    </form>
+  </aside>
+</section>
+
+<section class="panel" style="margin-top: 16px">
+  <div class="panel-header"><h2>Comprobantes emitidos</h2></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Numero</th><th>Pago</th><th>Total</th><th>Estado</th><th>Emision</th></tr></thead>
+      <tbody>
+        {% for invoice in invoices %}
+          <tr>
+            <td>{{ invoice.number }}</td>
+            <td>{{ invoice.payment.member }}</td>
+            <td>S/ {{ invoice.total }}</td>
+            <td><span class="badge {{ invoice.status }}">{{ invoice.get_status_display }}</span></td>
+            <td>{{ invoice.issued_at|date:"d/m/Y H:i" }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5" class="empty">No hay comprobantes emitidos.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

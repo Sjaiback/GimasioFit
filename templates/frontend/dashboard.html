@@ -1,0 +1,126 @@
+{% extends "frontend/base.html" %}
+
+{% block title %}Dashboard | Control Fit{% endblock %}
+
+{% block content %}
+<section class="topbar">
+  <div>
+    <div class="eyebrow">Vista general</div>
+    <h1>Ritmo del gimnasio en tiempo real</h1>
+  </div>
+  <div class="top-actions">
+    <a class="button" href="/admin/">Admin Django</a>
+    <a class="button primary" href="{% url 'frontend:members' %}">Registrar socio</a>
+  </div>
+</section>
+
+<section class="grid stats">
+  <article class="stat" style="--accent: var(--blue)">
+    <span>Total socios</span>
+    <strong>{{ dashboard.total_members }}</strong>
+  </article>
+  <article class="stat" style="--accent: var(--green)">
+    <span>Socios activos</span>
+    <strong>{{ dashboard.active_members }}</strong>
+  </article>
+  <article class="stat" style="--accent: var(--amber)">
+    <span>Ingresos del mes</span>
+    <strong>S/ {{ dashboard.monthly_income }}</strong>
+  </article>
+  <article class="stat" style="--accent: var(--red)">
+    <span>Vencen pronto</span>
+    <strong>{{ dashboard.expiring_memberships }}</strong>
+  </article>
+</section>
+
+<section class="grid layout-two">
+  <div class="panel">
+    <div class="panel-header">
+      <div>
+        <h2>Alertas de vencimiento</h2>
+        <span class="eyebrow">Proximos 7 dias</span>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Socio</th><th>Vence</th><th>Dias</th></tr>
+        </thead>
+        <tbody>
+          {% for alert in dashboard.expiration_alerts %}
+            <tr>
+              <td>{{ alert.member }}</td>
+              <td>{{ alert.end_date }}</td>
+              <td><span class="badge pending">{{ alert.days_to_expire }}</span></td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="3" class="empty">No hay membresias por vencer esta semana.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <div>
+        <h2>Ingresos</h2>
+        <span class="eyebrow">Historico verificado</span>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="stat" style="--accent: var(--green); min-height: 112px">
+        <span>Total verificado</span>
+        <strong>S/ {{ admin_report.verified_income }}</strong>
+      </div>
+      <div class="stat" style="--accent: var(--amber); min-height: 112px; margin-top: 14px">
+        <span>Deuda pendiente</span>
+        <strong>S/ {{ admin_report.pending_debt }}</strong>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="grid layout-two">
+  <div class="panel">
+    <div class="panel-header"><h2>Socios recientes</h2></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Nombre</th><th>DNI</th><th>Estado</th><th>Telefono</th></tr></thead>
+        <tbody>
+          {% for member in recent_members %}
+            <tr>
+              <td>{{ member }}</td>
+              <td>{{ member.document_number }}</td>
+              <td><span class="badge {{ member.status }}">{{ member.get_status_display }}</span></td>
+              <td>{{ member.phone|default:"-" }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="4" class="empty">Aun no hay socios registrados.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header"><h2>Pagos recientes</h2></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Socio</th><th>Monto</th><th>Estado</th></tr></thead>
+        <tbody>
+          {% for payment in recent_payments %}
+            <tr>
+              <td>{{ payment.member }}</td>
+              <td>S/ {{ payment.amount }}</td>
+              <td><span class="badge {{ payment.status }}">{{ payment.get_status_display }}</span></td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="3" class="empty">Aun no hay pagos registrados.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}
